@@ -134,7 +134,7 @@ export const getAutocompleteSuggestions = async (
     const results: AutocompleteResult[] = [];
     const cities = new Set<string>();
 
-    data?.forEach((location) => {
+    (data as Array<{ id: string; name: string; city: string; category: string }>)?.forEach((location) => {
       // Add location result
       results.push({
         type: 'location',
@@ -166,7 +166,7 @@ export const getAutocompleteSuggestions = async (
  * Get recommended locations based on user preferences
  */
 export const getRecommendations = async (
-  userId?: string,
+  _userId?: string,
   vibes?: string[],
   city?: string,
   limit: number = 20
@@ -215,7 +215,7 @@ export const saveLocation = async (
   try {
     const { data, error } = await supabase
       .from('saves')
-      .insert({ user_id: userId, location_id: locationId })
+      .insert({ user_id: userId, location_id: locationId } as any)
       .select()
       .single();
 
@@ -318,7 +318,7 @@ export const createList = async (
         name,
         description,
         privacy,
-      })
+      } as any)
       .select()
       .single();
 
@@ -362,7 +362,7 @@ export const addLocationToList = async (
       list_id: listId,
       location_id: locationId,
       added_by: userId,
-    });
+    } as any);
 
     if (error) throw error;
   } catch (error) {
@@ -425,6 +425,7 @@ export const updateUserProfile = async (
   try {
     const { data, error } = await supabase
       .from('users')
+      // @ts-ignore - Supabase type inference issue with partial updates
       .update(updates)
       .eq('id', userId)
       .select()
@@ -457,7 +458,7 @@ export const createUserProfile = async (
         name,
         avatar_url: avatarUrl,
         preferred_vibes: preferredVibes || [],
-      })
+      } as any)
       .select()
       .single();
 

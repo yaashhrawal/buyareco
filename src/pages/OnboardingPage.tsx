@@ -11,11 +11,8 @@ import {
   Plane,
   Home,
   Users,
-  Camera,
   Instagram,
   ArrowRight,
-  Plus,
-  X,
   Check,
 } from 'lucide-react';
 import toast from 'react-hot-toast';

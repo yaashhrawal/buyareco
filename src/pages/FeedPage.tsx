@@ -92,7 +92,7 @@ export default function FeedPage() {
   const currentRequest = MOCK_REQUESTS[currentIndex];
 
   // Swipe handlers
-  const handleDragEnd = (event: any, info: any) => {
+  const handleDragEnd = (_event: any, info: any) => {
     const threshold = 50;
     const velocity = info.velocity.y;
     const offset = info.offset.y;

@@ -59,7 +59,7 @@ export const useSaveLocation = () => {
   return useMutation({
     mutationFn: ({ userId, locationId }: { userId: string; locationId: string }) =>
       saveLocation(userId, locationId),
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate saved locations query
       queryClient.invalidateQueries({ queryKey: saveKeys.user(variables.userId) });
       // Update the check query
@@ -85,7 +85,7 @@ export const useUnsaveLocation = () => {
   return useMutation({
     mutationFn: ({ userId, locationId }: { userId: string; locationId: string }) =>
       unsaveLocation(userId, locationId),
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate saved locations query
       queryClient.invalidateQueries({ queryKey: saveKeys.user(variables.userId) });
       // Update the check query
