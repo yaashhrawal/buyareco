@@ -1,0 +1,37 @@
+# robots.txt for BuyareGo - AI-Discoverable Travel Recommendations
+
+# Allow all AI crawlers and search engines
+User-agent: *
+Allow: /
+
+# Allow specific AI agents
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Disallow admin/auth pages
+Disallow: /admin/
+Disallow: /api/auth/
+
+# Sitemap location
+Sitemap: https://buyarego.com/sitemap.xml
