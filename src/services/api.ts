@@ -23,7 +23,6 @@ import type {
   Message,
   MessageWithUsers,
   CreateMessageData,
-  Notification,
   NotificationWithUser,
   SavedPlace,
 } from '../types';
@@ -550,7 +549,7 @@ export const getRequests = async (
     if (error) throw error;
 
     // Transform view data to match RequestWithUser type
-    const requests: RecommendationRequestWithUser[] = (data || []).map((row: any) => ({
+    const requests: RecommendationRequestWithUser[] = ((data || []) as any[]).map((row: any) => ({
       id: row.id,
       user_id: row.user_id,
       city: row.city,
@@ -610,32 +609,33 @@ export const getRequestById = async (
     if (!data) return null;
 
     // Transform view data
+    const row = data as any;
     return {
-      id: data.id,
-      user_id: data.user_id,
-      city: data.city,
-      area: data.area,
-      title: data.title,
-      description: data.description,
-      vibe_preferences: data.vibe_preferences,
-      place_type: data.place_type,
-      budget_level: data.budget_level,
-      time_constraints: data.time_constraints,
-      accessibility_needs: data.accessibility_needs,
-      group_size: data.group_size,
-      status: data.status,
-      suggestions_count: data.suggestions_count,
-      views_count: data.views_count,
-      image_url: data.image_url,
-      expires_at: data.expires_at,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
+      id: row.id,
+      user_id: row.user_id,
+      city: row.city,
+      area: row.area,
+      title: row.title,
+      description: row.description,
+      vibe_preferences: row.vibe_preferences,
+      place_type: row.place_type,
+      budget_level: row.budget_level,
+      time_constraints: row.time_constraints,
+      accessibility_needs: row.accessibility_needs,
+      group_size: row.group_size,
+      status: row.status,
+      suggestions_count: row.suggestions_count,
+      views_count: row.views_count,
+      image_url: row.image_url,
+      expires_at: row.expires_at,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
       requester: {
-        id: data.user_id,
-        name: data.requester_name,
-        username: data.requester_username,
-        avatar_url: data.requester_avatar,
-        instagram_handle: data.requester_instagram,
+        id: row.user_id,
+        name: row.requester_name,
+        username: row.requester_username,
+        avatar_url: row.requester_avatar,
+        instagram_handle: row.requester_instagram,
         is_local: false,
         verified_local: false,
       },
@@ -654,12 +654,12 @@ export const updateRequest = async (
   updates: Partial<CreateRequestData>
 ): Promise<RecommendationRequest | null> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await ((supabase as any)
       .from('recommendation_requests')
-      .update(updates as any)
+      .update(updates)
       .eq('id', id)
       .select()
-      .single();
+      .single());
 
     if (error) throw error;
     return data;
@@ -677,10 +677,10 @@ export const closeRequest = async (
   status: 'resolved' | 'closed' = 'closed'
 ): Promise<void> => {
   try {
-    const { error } = await supabase
+    const { error } = await ((supabase as any)
       .from('recommendation_requests')
       .update({ status })
-      .eq('id', id);
+      .eq('id', id));
 
     if (error) throw error;
   } catch (error) {
@@ -750,10 +750,10 @@ export const markSuggestionHelpful = async (
   isHelpful: boolean
 ): Promise<void> => {
   try {
-    const { error } = await supabase
+    const { error } = await ((supabase as any)
       .from('suggestions')
       .update({ was_helpful: isHelpful })
-      .eq('id', suggestionId);
+      .eq('id', suggestionId));
 
     if (error) throw error;
   } catch (error) {
@@ -771,14 +771,14 @@ export const rateSuggestion = async (
   feedback?: string
 ): Promise<void> => {
   try {
-    const { error } = await supabase
+    const { error } = await ((supabase as any)
       .from('suggestions')
       .update({
         rating,
         traveler_feedback: feedback,
         was_tried: true,
       })
-      .eq('id', suggestionId);
+      .eq('id', suggestionId));
 
     if (error) throw error;
   } catch (error) {
@@ -846,10 +846,10 @@ export const getMessagesForRequest = async (
  */
 export const markMessageAsRead = async (messageId: string): Promise<void> => {
   try {
-    const { error } = await supabase
+    const { error } = await ((supabase as any)
       .from('messages')
       .update({ is_read: true })
-      .eq('id', messageId);
+      .eq('id', messageId));
 
     if (error) throw error;
   } catch (error) {
@@ -900,10 +900,10 @@ export const markNotificationAsRead = async (
   notificationId: string
 ): Promise<void> => {
   try {
-    const { error } = await supabase
+    const { error } = await ((supabase as any)
       .from('notifications')
       .update({ is_read: true })
-      .eq('id', notificationId);
+      .eq('id', notificationId));
 
     if (error) throw error;
   } catch (error) {
@@ -919,11 +919,11 @@ export const markAllNotificationsAsRead = async (
   userId: string
 ): Promise<void> => {
   try {
-    const { error } = await supabase
+    const { error } = await ((supabase as any)
       .from('notifications')
       .update({ is_read: true })
       .eq('user_id', userId)
-      .eq('is_read', false);
+      .eq('is_read', false));
 
     if (error) throw error;
   } catch (error) {
@@ -954,16 +954,17 @@ export const savePlaceFromSuggestion = async (
 
     if (suggError) throw suggError;
 
+    const suggData = suggestion as any;
     const { data, error } = await supabase
       .from('saved_places')
       .insert({
         user_id: userId,
         suggestion_id: suggestionId,
-        place_name: suggestion.place_name,
-        place_address: suggestion.place_address,
-        place_latitude: suggestion.place_latitude,
-        place_longitude: suggestion.place_longitude,
-        google_place_id: suggestion.google_place_id,
+        place_name: suggData.place_name,
+        place_address: suggData.place_address,
+        place_latitude: suggData.place_latitude,
+        place_longitude: suggData.place_longitude,
+        google_place_id: suggData.google_place_id,
         notes,
       } as any)
       .select()
