@@ -44,6 +44,50 @@ CREATE INDEX IF NOT EXISTS idx_users_is_local ON users(is_local);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 
 -- ============================================================================
+-- CREATE LOCATIONS TABLE (if it doesn't exist)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS locations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  description TEXT,
+  address TEXT NOT NULL,
+  city TEXT NOT NULL,
+  latitude DECIMAL(10, 7) NOT NULL,
+  longitude DECIMAL(10, 7) NOT NULL,
+  vibes TEXT[] DEFAULT '{}',
+  category TEXT NOT NULL,
+  price_level INTEGER CHECK (price_level >= 1 AND price_level <= 4),
+  rating DECIMAL(3, 2) CHECK (rating >= 0 AND rating <= 5),
+  photos TEXT[] DEFAULT '{}',
+  hours JSONB,
+  google_place_id TEXT,
+  is_expert_pick BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE locations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Locations are publicly readable" ON locations;
+CREATE POLICY "Locations are publicly readable"
+  ON locations FOR SELECT
+  TO public
+  USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can insert locations" ON locations;
+CREATE POLICY "Authenticated users can insert locations"
+  ON locations FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+CREATE INDEX IF NOT EXISTS idx_locations_city ON locations(city);
+CREATE INDEX IF NOT EXISTS idx_locations_vibes ON locations USING GIN(vibes);
+CREATE INDEX IF NOT EXISTS idx_locations_category ON locations(category);
+CREATE INDEX IF NOT EXISTS idx_locations_rating ON locations(rating DESC);
+CREATE INDEX IF NOT EXISTS idx_locations_expert_pick ON locations(is_expert_pick);
+CREATE INDEX IF NOT EXISTS idx_locations_coords ON locations(latitude, longitude);
+
+-- ============================================================================
 -- CREATE NEW P2P TABLES
 -- ============================================================================
 
