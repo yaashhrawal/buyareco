@@ -40,9 +40,31 @@ export interface User {
   id: string;
   email: string;
   name: string | null;
+  username: string | null;
   avatar_url: string | null;
+  bio: string | null;
+  instagram_handle: string | null;
+
+  // Preferences (for travelers)
   preferred_vibes: Vibe[];
+
+  // Local expertise (for locals)
+  is_local: boolean;
+  local_cities: string[];
+  years_in_city: number | null;
+  expertise_tags: string[];
+
+  // Reputation
+  total_suggestions: number;
+  helpful_suggestions: number;
+  response_rate: number;
+  avg_rating: number | null;
+  verified_local: boolean;
+
+  // Activity
+  last_active_at: string;
   created_at: string;
+  updated_at: string;
 }
 
 export interface UserProfile extends User {
@@ -50,6 +72,16 @@ export interface UserProfile extends User {
   saved_count: number;
   list_count: number;
   review_count: number;
+}
+
+export interface UserCard {
+  id: string;
+  name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  instagram_handle: string | null;
+  is_local: boolean;
+  verified_local: boolean;
 }
 
 // ============================================================================
@@ -201,6 +233,195 @@ export interface Follow {
   follower_id: string;
   following_id: string;
   created_at: string;
+}
+
+// ============================================================================
+// P2P RECOMMENDATION TYPES
+// ============================================================================
+
+export type RequestStatus = 'open' | 'resolved' | 'closed';
+
+export interface RecommendationRequest {
+  id: string;
+  user_id: string;
+
+  // Location details
+  city: string;
+  area: string | null;
+
+  // Request details
+  title: string;
+  description: string;
+  vibe_preferences: string[];
+  place_type: string | null;
+
+  // Constraints
+  budget_level: PriceLevel | null;
+  time_constraints: string | null;
+  accessibility_needs: string | null;
+  group_size: number | null;
+
+  // Metadata
+  status: RequestStatus;
+  suggestions_count: number;
+  views_count: number;
+  image_url: string | null;
+  expires_at: string | null;
+
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecommendationRequestWithUser extends RecommendationRequest {
+  requester: UserCard;
+}
+
+export interface CreateRequestData {
+  city: string;
+  area?: string;
+  title: string;
+  description: string;
+  vibe_preferences: string[];
+  place_type?: string;
+  budget_level?: PriceLevel;
+  time_constraints?: string;
+  accessibility_needs?: string;
+  group_size?: number;
+  image_url?: string;
+}
+
+// ============================================================================
+// SUGGESTION TYPES
+// ============================================================================
+
+export interface Suggestion {
+  id: string;
+  request_id: string;
+  user_id: string;
+
+  // Suggestion details
+  place_name: string;
+  place_address: string | null;
+  place_latitude: number | null;
+  place_longitude: number | null;
+  google_place_id: string | null;
+  location_id: string | null;
+
+  // Why it matches
+  recommendation_text: string;
+  insider_tips: string | null;
+  best_time_to_visit: string | null;
+  photos: string[];
+
+  // Feedback from traveler
+  was_helpful: boolean | null;
+  was_tried: boolean;
+  rating: number | null; // 1-5
+  traveler_feedback: string | null;
+
+  // Metadata
+  helpful_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SuggestionWithUser extends Suggestion {
+  suggester: UserCard;
+}
+
+export interface CreateSuggestionData {
+  request_id: string;
+  place_name: string;
+  place_address?: string;
+  place_latitude?: number;
+  place_longitude?: number;
+  google_place_id?: string;
+  location_id?: string;
+  recommendation_text: string;
+  insider_tips?: string;
+  best_time_to_visit?: string;
+  photos?: string[];
+}
+
+// ============================================================================
+// MESSAGE TYPES
+// ============================================================================
+
+export interface Message {
+  id: string;
+  request_id: string;
+  suggestion_id: string | null;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface MessageWithUsers extends Message {
+  sender: UserCard;
+  receiver: UserCard;
+}
+
+export interface CreateMessageData {
+  request_id: string;
+  suggestion_id?: string;
+  receiver_id: string;
+  content: string;
+}
+
+// ============================================================================
+// NOTIFICATION TYPES
+// ============================================================================
+
+export type NotificationType =
+  | 'new_request_in_city'
+  | 'new_suggestion'
+  | 'suggestion_helpful'
+  | 'message_received'
+  | 'suggestion_tried'
+  | 'new_follower';
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+
+  // Related entities
+  request_id: string | null;
+  suggestion_id: string | null;
+  message_id: string | null;
+  from_user_id: string | null;
+
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationWithUser extends Notification {
+  from_user: UserCard | null;
+}
+
+// ============================================================================
+// SAVED PLACES TYPES
+// ============================================================================
+
+export interface SavedPlace {
+  id: string;
+  user_id: string;
+  suggestion_id: string | null;
+  place_name: string;
+  place_address: string | null;
+  place_latitude: number | null;
+  place_longitude: number | null;
+  google_place_id: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface SavedPlaceWithSuggestion extends SavedPlace {
+  suggestion: Suggestion | null;
 }
 
 // ============================================================================
