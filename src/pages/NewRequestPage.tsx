@@ -8,6 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, ArrowLeft, Send, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useCreateRequest } from '../hooks/useRequests';
+import { useAuth } from '../hooks/useAuth';
+import type { PriceLevel } from '../types';
 
 const VIBE_OPTIONS = [
   'calm',
@@ -37,7 +40,8 @@ const PLACE_TYPES = [
 
 export default function NewRequestPage() {
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const createRequestMutation = useCreateRequest();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -63,38 +67,49 @@ export default function NewRequestPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+
+    // Check authentication
+    if (!user) {
+      toast.error('You must be logged in to create a request');
+      navigate('/auth');
+      return;
+    }
 
     // Validation
     if (!formData.city.trim()) {
       toast.error('Please enter a city');
-      setIsSubmitting(false);
       return;
     }
 
     if (!formData.title.trim()) {
       toast.error('Please enter a title');
-      setIsSubmitting(false);
       return;
     }
 
     if (!formData.description.trim()) {
       toast.error('Please describe what you are looking for');
-      setIsSubmitting(false);
       return;
     }
 
     try {
-      // TODO: Submit to Supabase
-      console.log('Submitting request:', formData);
-
-      toast.success('Request posted! Locals will start suggesting soon.');
-      navigate('/requests');
+      await createRequestMutation.mutateAsync({
+        userId: user.id,
+        data: {
+          city: formData.city.trim(),
+          area: formData.area.trim() || undefined,
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          vibe_preferences: formData.vibes,
+          place_type: formData.placeType || undefined,
+          budget_level: formData.budgetLevel as PriceLevel,
+          time_constraints: formData.timeConstraints.trim() || undefined,
+          group_size: formData.groupSize,
+        },
+      });
+      navigate('/browse');
     } catch (error) {
       console.error('Error submitting request:', error);
-      toast.error('Failed to post request. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      // Error toast handled by the hook
     }
   };
 
@@ -302,11 +317,11 @@ export default function NewRequestPage() {
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={createRequestMutation.isPending}
                 className="flex-1 px-6 py-3 bg-primary-900 dark:bg-white text-white dark:text-primary-900 rounded-lg font-medium hover:bg-primary-800 dark:hover:bg-primary-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
               >
-                {isSubmitting ? 'Posting...' : 'Post Request'}
-                {!isSubmitting && <Send className="w-5 h-5" />}
+                {createRequestMutation.isPending ? 'Posting...' : 'Post Request'}
+                {!createRequestMutation.isPending && <Send className="w-5 h-5" />}
               </button>
             </div>
           </form>

@@ -7,61 +7,25 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, ArrowLeft, MessageCircle, Clock, Users, Filter, Search } from 'lucide-react';
-
-// Mock data - will be replaced with real data from Supabase
-const MOCK_REQUESTS = [
-  {
-    id: '1',
-    title: 'Calm aesthetic cafe in old city to work from',
-    description:
-      "I'm traveling to Udaipur next week and need a peaceful cafe with good WiFi and aesthetic vibe to work remotely. Prefer somewhere in the old city area.",
-    city: 'Udaipur',
-    area: 'Old City',
-    vibes: ['calm', 'aesthetic', 'productive'],
-    placeType: 'cafe',
-    budgetLevel: 2,
-    requesterName: 'Abhi',
-    requesterAvatar: null,
-    suggestionsCount: 3,
-    createdAt: '2 hours ago',
-  },
-  {
-    id: '2',
-    title: 'Romantic rooftop restaurant for anniversary',
-    description:
-      "It's our 5th anniversary and we want somewhere special with a view. Budget is not an issue, just want the best romantic spot.",
-    city: 'Udaipur',
-    area: 'Lake Pichola',
-    vibes: ['romantic', 'aesthetic'],
-    placeType: 'restaurant',
-    budgetLevel: 4,
-    requesterName: 'Priya & Rahul',
-    requesterAvatar: null,
-    suggestionsCount: 5,
-    createdAt: '5 hours ago',
-  },
-  {
-    id: '3',
-    title: 'Hidden gem breakfast spot locals love',
-    description:
-      'Tired of tourist traps! Where do actual locals go for breakfast? Want authentic, delicious, and not overpriced.',
-    city: 'Udaipur',
-    area: null,
-    vibes: ['authentic', 'local'],
-    placeType: 'restaurant',
-    budgetLevel: 2,
-    requesterName: 'Sarah',
-    requesterAvatar: null,
-    suggestionsCount: 1,
-    createdAt: '1 day ago',
-  },
-];
+import { useRequests } from '../hooks/useRequests';
+import { formatDistanceToNow } from '../utils/helpers';
 
 export default function BrowseRequestsPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
-  const [requests] = useState(MOCK_REQUESTS);
+
+  // Fetch requests with filters
+  const { data, isLoading } = useRequests(
+    {
+      city: selectedCity !== 'all' ? selectedCity : undefined,
+      status: 'open',
+    },
+    1,
+    20
+  );
+
+  const requests = data?.requests || [];
 
   return (
     <div className="min-h-screen bg-primary-50 dark:bg-primary-950">
@@ -124,9 +88,18 @@ export default function BrowseRequestsPage() {
           </p>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-20">
+            <div className="inline-block w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+            <p className="mt-4 text-primary-600 dark:text-primary-400">Loading requests...</p>
+          </div>
+        )}
+
         {/* Requests List */}
-        <div className="space-y-4 max-w-4xl">
-          {requests.map((request, index) => (
+        {!isLoading && requests.length > 0 && (
+          <div className="space-y-4 max-w-4xl">
+            {requests.map((request, index) => (
             <motion.div
               key={request.id}
               initial={{ opacity: 0, y: 20 }}
@@ -151,13 +124,13 @@ export default function BrowseRequestsPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
-                      <span>{request.createdAt}</span>
+                      <span>{formatDistanceToNow(new Date(request.created_at))}</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 px-3 py-1 bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400 rounded-full text-sm font-medium">
                   <MessageCircle className="w-4 h-4" />
-                  <span>{request.suggestionsCount}</span>
+                  <span>{request.suggestions_count}</span>
                 </div>
               </div>
 
@@ -168,7 +141,7 @@ export default function BrowseRequestsPage() {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-4">
-                {request.vibes.map((vibe) => (
+                {request.vibe_preferences?.map((vibe) => (
                   <span
                     key={vibe}
                     className="px-3 py-1 bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium"
@@ -176,24 +149,34 @@ export default function BrowseRequestsPage() {
                     {vibe}
                   </span>
                 ))}
-                {request.placeType && (
+                {request.place_type && (
                   <span className="px-3 py-1 bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium">
-                    {request.placeType}
+                    {request.place_type}
                   </span>
                 )}
-                <span className="px-3 py-1 bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium">
-                  {'$'.repeat(request.budgetLevel)}
-                </span>
+                {request.budget_level && (
+                  <span className="px-3 py-1 bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium">
+                    {'$'.repeat(request.budget_level)}
+                  </span>
+                )}
               </div>
 
               {/* Footer */}
               <div className="flex items-center justify-between pt-4 border-t border-primary-200 dark:border-primary-800">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-primary-200 dark:bg-primary-700 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  <div className="w-8 h-8 bg-primary-200 dark:bg-primary-700 rounded-full flex items-center justify-center overflow-hidden">
+                    {request.requester?.avatar_url ? (
+                      <img
+                        src={request.requester.avatar_url}
+                        alt={request.requester.name || 'User'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    )}
                   </div>
                   <span className="text-sm font-medium text-primary-900 dark:text-white">
-                    {request.requesterName}
+                    {request.requester?.name || 'Anonymous'}
                   </span>
                 </div>
                 <button
@@ -207,11 +190,12 @@ export default function BrowseRequestsPage() {
                 </button>
               </div>
             </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
-        {requests.length === 0 && (
+        {!isLoading && requests.length === 0 && (
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-primary-100 dark:bg-primary-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageCircle className="w-8 h-8 text-primary-400" />
