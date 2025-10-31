@@ -13,6 +13,8 @@ import OnboardingPage from './pages/OnboardingPage';
 import NewRequestPage from './pages/NewRequestPage';
 import BrowseRequestsPage from './pages/BrowseRequestsPage';
 import FeedPage from './pages/FeedPage';
+import MessagesPage from './pages/MessagesPage';
+import ProfilePage from './pages/ProfilePage';
 import TestPage from './pages/TestPage';
 
 // Create React Query client
@@ -41,6 +43,9 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/feed" element={<FeedPage />} />
           <Route path="/requests/new" element={<NewRequestPage />} />
           <Route path="/browse" element={<BrowseRequestsPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
           {/* Add more routes as we build them */}
         </Routes>
 

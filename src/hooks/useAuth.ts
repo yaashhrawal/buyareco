@@ -221,3 +221,8 @@ export const useRequireAuth = () => {
 
   return { user, isLoading };
 };
+
+/**
+ * Main auth hook - alias for useAuthState for convenience
+ */
+export const useAuth = useAuthState;

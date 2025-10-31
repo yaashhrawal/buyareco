@@ -22,64 +22,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-// Mock data - will be replaced with real data
-const MOCK_REQUESTS = [
-  {
-    id: '1',
-    title: 'Calm aesthetic cafe to work from',
-    description:
-      "Need a peaceful cafe with good WiFi in Udaipur's old city. Looking for that aesthetic vibe where I can work on my laptop for 3-4 hours. Budget-friendly would be great!",
-    city: 'Udaipur',
-    area: 'Old City',
-    vibes: ['calm', 'aesthetic', 'productive'],
-    requester: {
-      name: 'Abhi',
-      username: 'abhi_traveler',
-      avatar: null,
-      instagramHandle: 'abhi.travels',
-    },
-    suggestionsCount: 3,
-    createdAt: '2h ago',
-    image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&h=1200&fit=crop',
-  },
-  {
-    id: '2',
-    title: 'Best sunrise viewpoint for photography',
-    description:
-      'Visiting Jaipur next week and want to catch an epic sunrise with my camera. Where do locals go? Looking for something less touristy but still accessible.',
-    city: 'Jaipur',
-    area: null,
-    vibes: ['adventure', 'photogenic', 'peaceful'],
-    requester: {
-      name: 'Sarah Chen',
-      username: 'sarahwanders',
-      avatar: null,
-      instagramHandle: 'sarahcaptures',
-    },
-    suggestionsCount: 7,
-    createdAt: '5h ago',
-    image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&h=1200&fit=crop',
-  },
-  {
-    id: '3',
-    title: 'Authentic street food spot',
-    description:
-      "I'm done with tourist traps! Where do locals actually eat? Looking for the best street food in Delhi - the real deal, not the sanitized version. My stomach can handle it 😄",
-    city: 'Delhi',
-    area: 'Old Delhi',
-    vibes: ['authentic', 'food', 'adventure'],
-    requester: {
-      name: 'Marco',
-      username: 'marco_eats',
-      avatar: null,
-      instagramHandle: 'marco.foodie',
-    },
-    suggestionsCount: 12,
-    createdAt: '1d ago',
-    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=1200&fit=crop',
-  },
-];
+import { MOCK_TRENDING_REQUESTS } from '../data/mockData';
 
 export default function FeedPage() {
   const navigate = useNavigate();
@@ -88,6 +31,25 @@ export default function FeedPage() {
   const [suggestionText, setSuggestionText] = useState('');
   const controls = useAnimation();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Transform mock data to component format
+  const MOCK_REQUESTS = MOCK_TRENDING_REQUESTS.map(req => ({
+    id: req.id,
+    title: req.title,
+    description: req.description,
+    city: req.city,
+    area: req.area,
+    vibes: req.vibes,
+    requester: {
+      name: req.requester.name,
+      username: req.requester.username,
+      avatar: req.requester.avatar,
+      instagramHandle: req.requester.instagram_handle,
+    },
+    suggestionsCount: req.suggestionsCount,
+    createdAt: req.createdAt,
+    image: req.image,
+  }));
 
   const currentRequest = MOCK_REQUESTS[currentIndex];
 
@@ -405,11 +367,17 @@ export default function FeedPage() {
             <Home className="w-6 h-6" />
             <span className="text-xs">Feed</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-white/60 hover:text-white transition-colors">
+          <button
+            onClick={() => navigate('/browse')}
+            className="flex flex-col items-center gap-1 text-white/60 hover:text-white transition-colors"
+          >
             <TrendingUp className="w-6 h-6" />
-            <span className="text-xs">Trending</span>
+            <span className="text-xs">Browse</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-white/60 hover:text-white transition-colors">
+          <button
+            onClick={() => navigate('/messages')}
+            className="flex flex-col items-center gap-1 text-white/60 hover:text-white transition-colors"
+          >
             <MessageCircle className="w-6 h-6" />
             <span className="text-xs">Chats</span>
           </button>

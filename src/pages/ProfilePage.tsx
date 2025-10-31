@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useUserProfile, useUpdateProfile } from '../hooks/useProfile';
 import { useAuth } from '../hooks/useAuth';
+import { MOCK_USERS } from '../data/mockData';
 import toast from 'react-hot-toast';
 
 const VIBE_OPTIONS = [
@@ -48,6 +49,24 @@ export default function ProfilePage() {
   const { data: profile, isLoading } = useUserProfile(profileUserId);
   const updateProfileMutation = useUpdateProfile();
 
+  // Use mock data if no profile is found (for demo purposes)
+  const mockProfile = MOCK_USERS[0]; // Use first mock user as demo
+  const displayProfile = profile || (isLoading ? null : {
+    id: mockProfile.id,
+    name: mockProfile.name,
+    bio: mockProfile.bio,
+    city: mockProfile.city,
+    avatar_url: mockProfile.avatar,
+    instagram_handle: mockProfile.instagram_handle,
+    preferred_vibes: mockProfile.preferred_vibes,
+    is_local: true,
+    reputation_score: mockProfile.rating * 20,
+    suggestions_count: mockProfile.suggestionsGiven,
+    helpful_suggestions_count: mockProfile.suggestionsGiven - 10,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -61,13 +80,13 @@ export default function ProfilePage() {
 
   // Initialize edit form when profile loads
   const handleStartEdit = () => {
-    if (profile) {
+    if (displayProfile) {
       setEditForm({
-        name: profile.name || '',
-        bio: profile.bio || '',
-        city: profile.city || '',
-        instagram_handle: profile.instagram_handle || '',
-        preferred_vibes: profile.preferred_vibes || [],
+        name: displayProfile.name || '',
+        bio: displayProfile.bio || '',
+        city: displayProfile.city || '',
+        instagram_handle: displayProfile.instagram_handle || '',
+        preferred_vibes: displayProfile.preferred_vibes || [],
       });
       setIsEditing(true);
     }
@@ -111,7 +130,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!profile) {
+  if (!displayProfile) {
     return (
       <div className="min-h-screen bg-white dark:bg-primary-950 flex items-center justify-center p-6">
         <div className="text-center">
@@ -186,10 +205,10 @@ export default function ProfilePage() {
               {/* Avatar */}
               <div className="relative">
                 <div className="w-32 h-32 bg-primary-200 dark:bg-primary-700 rounded-full flex items-center justify-center overflow-hidden">
-                  {profile.avatar_url ? (
+                  {displayProfile.avatar_url ? (
                     <img
-                      src={profile.avatar_url}
-                      alt={profile.name || 'User'}
+                      src={displayProfile.avatar_url}
+                      alt={displayProfile.name || 'User'}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -243,32 +262,32 @@ export default function ProfilePage() {
                 ) : (
                   <>
                     <h1 className="text-3xl font-bold text-primary-900 dark:text-white mb-2">
-                      {profile.name || 'Anonymous User'}
+                      {displayProfile.name || 'Anonymous User'}
                     </h1>
-                    {profile.bio && (
+                    {displayProfile.bio && (
                       <p className="text-primary-600 dark:text-primary-400 mb-4 leading-relaxed">
-                        {profile.bio}
+                        {displayProfile.bio}
                       </p>
                     )}
                     <div className="flex flex-wrap gap-4 text-sm">
-                      {profile.city && (
+                      {displayProfile.city && (
                         <div className="flex items-center gap-1 text-primary-600 dark:text-primary-400">
                           <MapPin className="w-4 h-4" />
-                          <span>{profile.city}</span>
+                          <span>{displayProfile.city}</span>
                         </div>
                       )}
-                      {profile.instagram_handle && (
+                      {displayProfile.instagram_handle && (
                         <a
-                          href={`https://instagram.com/${profile.instagram_handle.replace('@', '')}`}
+                          href={`https://instagram.com/${displayProfile.instagram_handle.replace('@', '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white transition-colors"
                         >
                           <Instagram className="w-4 h-4" />
-                          <span>{profile.instagram_handle}</span>
+                          <span>{displayProfile.instagram_handle}</span>
                         </a>
                       )}
-                      {profile.is_local && (
+                      {displayProfile.is_local && (
                         <div className="flex items-center gap-1 px-3 py-1 bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400 rounded-full font-medium">
                           <Award className="w-4 h-4" />
                           <span>Local Expert</span>
@@ -284,7 +303,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-primary-200 dark:border-primary-800">
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary-900 dark:text-white mb-1">
-                  {profile.reputation_score || 0}
+                  {displayProfile.reputation_score || 0}
                 </div>
                 <div className="text-sm text-primary-500 flex items-center justify-center gap-1">
                   <Star className="w-4 h-4" />
@@ -293,7 +312,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary-900 dark:text-white mb-1">
-                  {profile.suggestions_count || 0}
+                  {displayProfile.suggestions_count || 0}
                 </div>
                 <div className="text-sm text-primary-500 flex items-center justify-center gap-1">
                   <ThumbsUp className="w-4 h-4" />
@@ -302,7 +321,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary-900 dark:text-white mb-1">
-                  {profile.helpful_suggestions_count || 0}
+                  {displayProfile.helpful_suggestions_count || 0}
                 </div>
                 <div className="text-sm text-primary-500 flex items-center justify-center gap-1">
                   <Award className="w-4 h-4" />
@@ -339,9 +358,9 @@ export default function ProfilePage() {
                   </button>
                 ))}
               </div>
-            ) : profile.preferred_vibes && profile.preferred_vibes.length > 0 ? (
+            ) : displayProfile.preferred_vibes && displayProfile.preferred_vibes.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {profile.preferred_vibes.map((vibe) => (
+                {displayProfile.preferred_vibes.map((vibe) => (
                   <span
                     key={vibe}
                     className="px-4 py-2 bg-primary-100 dark:bg-primary-800 text-primary-700 dark:text-primary-300 rounded-lg text-sm font-medium"

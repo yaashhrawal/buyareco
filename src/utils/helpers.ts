@@ -62,6 +62,11 @@ export const formatRelativeTime = (date: string | Date): string => {
   return `${Math.floor(diffDays / 365)}y ago`;
 };
 
+/**
+ * Alias for formatRelativeTime (for compatibility)
+ */
+export const formatDistanceToNow = formatRelativeTime;
+
 // ============================================================================
 // VIBE HELPERS
 // ============================================================================
