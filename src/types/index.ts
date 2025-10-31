@@ -44,9 +44,10 @@ export interface User {
   avatar_url: string | null;
   bio: string | null;
   instagram_handle: string | null;
+  city?: string; // Added for profile compatibility
 
   // Preferences (for travelers)
-  preferred_vibes: Vibe[];
+  preferred_vibes: Vibe[] | string[]; // Allow string[] for compatibility
 
   // Local expertise (for locals)
   is_local: boolean;
@@ -57,6 +58,9 @@ export interface User {
   // Reputation
   total_suggestions: number;
   helpful_suggestions: number;
+  reputation_score?: number; // Added for profile compatibility
+  suggestions_count?: number; // Alias for total_suggestions
+  helpful_suggestions_count?: number; // Alias for helpful_suggestions
   response_rate: number;
   avg_rating: number | null;
   verified_local: boolean;

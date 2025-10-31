@@ -385,7 +385,7 @@ export default function ProfilePage() {
               className="flex gap-4"
             >
               <button
-                onClick={() => toast.info('Messaging feature coming soon!')}
+                onClick={() => toast('Messaging feature coming soon!')}
                 className="flex-1 px-6 py-3 bg-primary-900 dark:bg-white text-white dark:text-primary-900 rounded-xl font-medium hover:bg-primary-800 dark:hover:bg-primary-100 transition-all inline-flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-5 h-5" />
