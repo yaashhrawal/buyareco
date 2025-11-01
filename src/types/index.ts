@@ -46,6 +46,13 @@ export interface User {
   instagram_handle: string | null;
   city?: string; // Added for profile compatibility
 
+  // Instagram Integration
+  instagram_access_token?: string | null;
+  instagram_user_id?: string | null;
+  instagram_username?: string | null;
+  instagram_token_expires_at?: string | null;
+  instagram_photos?: string[] | null; // Top 6 photos cached
+
   // Preferences (for travelers)
   preferred_vibes: Vibe[] | string[]; // Allow string[] for compatibility
 

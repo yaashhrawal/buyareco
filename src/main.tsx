@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import AuthPage from './pages/AuthPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
+import InstagramCallbackPage from './pages/InstagramCallbackPage';
 import OnboardingPage from './pages/OnboardingPage';
 import NewRequestPage from './pages/NewRequestPage';
 import BrowseRequestsPage from './pages/BrowseRequestsPage';
@@ -39,6 +40,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/search" element={<SearchPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/instagram/callback" element={<InstagramCallbackPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/signup" element={<AuthPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />

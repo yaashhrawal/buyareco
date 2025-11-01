@@ -24,6 +24,8 @@ import { useUserProfile, useUpdateProfile } from '../hooks/useProfile';
 import { useAuth } from '../hooks/useAuth';
 import { MOCK_USERS } from '../data/mockData';
 import toast from 'react-hot-toast';
+import InstagramPhotoGrid from '../components/InstagramPhotoGrid';
+import { connectInstagram, disconnectInstagram } from '../services/instagram';
 
 const VIBE_OPTIONS = [
   'calm',
@@ -63,11 +65,14 @@ export default function ProfilePage() {
     reputation_score: mockProfile.rating * 20,
     suggestions_count: mockProfile.suggestionsGiven,
     helpful_suggestions_count: mockProfile.suggestionsGiven - 10,
+    instagram_photos: null, // No photos connected for mock profile
+    instagram_username: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isConnectingInstagram, setIsConnectingInstagram] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     bio: '',
@@ -77,6 +82,32 @@ export default function ProfilePage() {
   });
 
   const isOwnProfile = currentUser?.id === profileUserId;
+
+  // Instagram handlers
+  const handleConnectInstagram = () => {
+    setIsConnectingInstagram(true);
+    try {
+      connectInstagram();
+    } catch (error) {
+      console.error('Failed to connect Instagram:', error);
+      toast.error('Failed to connect Instagram');
+      setIsConnectingInstagram(false);
+    }
+  };
+
+  const handleDisconnectInstagram = async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      await disconnectInstagram(currentUser.id);
+      toast.success('Instagram disconnected');
+      // Refresh the profile
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to disconnect Instagram:', error);
+      toast.error('Failed to disconnect Instagram');
+    }
+  };
 
   // Initialize edit form when profile loads
   const handleStartEdit = () => {
@@ -374,6 +405,22 @@ export default function ProfilePage() {
                 No preferred vibes selected yet
               </p>
             )}
+          </motion.div>
+
+          {/* Instagram Photo Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <InstagramPhotoGrid
+              photos={displayProfile.instagram_photos ?? null}
+              username={displayProfile.instagram_username ?? null}
+              isOwnProfile={isOwnProfile}
+              onConnect={handleConnectInstagram}
+              onDisconnect={handleDisconnectInstagram}
+              isConnecting={isConnectingInstagram}
+            />
           </motion.div>
 
           {/* Actions (for other users' profiles) */}
