@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Mail, Phone, Instagram, ArrowRight, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { signUpWithEmail, signInWithEmail, signInWithOAuth } from '../services/supabase';
 
 type AuthMode = 'signin' | 'signup';
 type AuthMethod = 'email' | 'phone' | 'google' | 'instagram';
@@ -30,24 +31,75 @@ export default function AuthPage() {
     setIsLoading(true);
 
     try {
-      // TODO: Implement Supabase auth
       if (authMethod === 'google') {
-        console.log('Google auth');
-        // supabase.auth.signInWithOAuth({ provider: 'google' })
+        // Google OAuth
+        const { error } = await signInWithOAuth('google');
+        if (error) throw error;
+        // User will be redirected to Google, then back to app
+        return;
       } else if (authMethod === 'instagram') {
-        console.log('Instagram auth');
-        // Custom Instagram OAuth flow
+        // Instagram not natively supported by Supabase
+        // For now, show a message. Can be implemented with custom backend
+        toast('Instagram login coming soon! Use Google or Email for now.', {
+          icon: '📸',
+          duration: 4000,
+        });
+        setIsLoading(false);
+        return;
       } else if (authMethod === 'email') {
-        console.log('Email auth', formData.email);
-      } else if (authMethod === 'phone') {
-        console.log('Phone auth', formData.phone);
-      }
+        // Email/Password authentication
+        if (!formData.email || !formData.password) {
+          toast.error('Please enter email and password');
+          setIsLoading(false);
+          return;
+        }
 
-      toast.success('Welcome to buyareco!');
-      navigate('/onboarding');
-    } catch (error) {
+        if (mode === 'signup') {
+          // Sign up
+          const { data, error } = await signUpWithEmail(
+            formData.email,
+            formData.password,
+            formData.name
+          );
+
+          if (error) throw error;
+
+          if (data?.user?.identities?.length === 0) {
+            // Email already exists
+            toast.error('This email is already registered. Try signing in instead.');
+            setIsLoading(false);
+            return;
+          }
+
+          toast.success('Account created! Check your email to verify.');
+          navigate('/onboarding');
+        } else {
+          // Sign in
+          const { error } = await signInWithEmail(formData.email, formData.password);
+          if (error) throw error;
+          toast.success('Welcome back!');
+          navigate('/feed');
+        }
+      } else if (authMethod === 'phone') {
+        // Phone auth - Supabase supports this but needs Twilio setup
+        toast('Phone authentication coming soon! Use email or Google for now.', {
+          icon: '📱',
+          duration: 4000,
+        });
+        setIsLoading(false);
+        return;
+      }
+    } catch (error: any) {
       console.error('Auth error:', error);
-      toast.error('Authentication failed. Please try again.');
+
+      // Handle specific error messages
+      if (error.message?.includes('Invalid login credentials')) {
+        toast.error('Invalid email or password');
+      } else if (error.message?.includes('Email not confirmed')) {
+        toast.error('Please verify your email before signing in');
+      } else {
+        toast.error(error.message || 'Authentication failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }

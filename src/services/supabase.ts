@@ -74,9 +74,10 @@ export const signInWithEmail = async (email: string, password: string) => {
 };
 
 /**
- * Sign in with OAuth provider (Google, Apple)
+ * Sign in with OAuth provider (Google, Apple, Facebook)
+ * Note: Use Facebook as alternative to Instagram (both are Meta products)
  */
-export const signInWithOAuth = async (provider: 'google' | 'apple') => {
+export const signInWithOAuth = async (provider: 'google' | 'apple' | 'facebook') => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
@@ -85,6 +86,7 @@ export const signInWithOAuth = async (provider: 'google' | 'apple') => {
         access_type: 'offline',
         prompt: 'consent',
       },
+      scopes: provider === 'facebook' ? 'email,public_profile' : undefined,
     },
   });
 

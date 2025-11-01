@@ -9,6 +9,7 @@ import './index.css';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import AuthPage from './pages/AuthPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import OnboardingPage from './pages/OnboardingPage';
 import NewRequestPage from './pages/NewRequestPage';
 import BrowseRequestsPage from './pages/BrowseRequestsPage';
@@ -37,6 +38,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/test" element={<TestPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/signup" element={<AuthPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
