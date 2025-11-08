@@ -47,19 +47,41 @@ export default function AuthPage() {
         setIsLoading(false);
         return;
       } else if (authMethod === 'email') {
-        // Email/Password authentication
+        // Email/Password authentication validation
         if (!formData.email || !formData.password) {
           toast.error('Please enter email and password');
           setIsLoading(false);
           return;
         }
 
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          toast.error('Please enter a valid email address');
+          setIsLoading(false);
+          return;
+        }
+
+        // Validate password length
+        if (formData.password.length < 6) {
+          toast.error('Password must be at least 6 characters');
+          setIsLoading(false);
+          return;
+        }
+
         if (mode === 'signup') {
+          // Validate name for signup
+          if (!formData.name || formData.name.trim().length < 2) {
+            toast.error('Please enter your full name');
+            setIsLoading(false);
+            return;
+          }
+
           // Sign up
           const { data, error } = await signUpWithEmail(
-            formData.email,
+            formData.email.trim(),
             formData.password,
-            formData.name
+            formData.name.trim()
           );
 
           if (error) throw error;
@@ -71,11 +93,19 @@ export default function AuthPage() {
             return;
           }
 
-          toast.success('Account created! Check your email to verify.');
+          // Check if email confirmation is required
+          if (data?.user && !data?.session) {
+            toast.success('Account created! Check your email to verify before signing in.', {
+              duration: 6000,
+            });
+          } else {
+            toast.success('Account created successfully!');
+          }
+
           navigate('/onboarding');
         } else {
           // Sign in
-          const { error } = await signInWithEmail(formData.email, formData.password);
+          const { error } = await signInWithEmail(formData.email.trim(), formData.password);
           if (error) throw error;
           toast.success('Welcome back!');
           navigate('/feed');
@@ -310,9 +340,15 @@ export default function AuthPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 placeholder="••••••••"
+                minLength={6}
                 className="w-full px-4 py-3 bg-white dark:bg-primary-900 border-2 border-primary-200 dark:border-primary-800 rounded-xl text-primary-900 dark:text-white placeholder-primary-400 focus:outline-none focus:border-accent-500 transition-all"
                 required
               />
+              {mode === 'signup' && (
+                <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                  At least 6 characters required
+                </p>
+              )}
             </div>
 
             {/* Submit */}
