@@ -393,4 +393,34 @@ VALUES
     ARRAY['https://example.com/photo1.jpg'],
     true
   );
-*/
+
+-- ============================================================================
+-- SWIPES TABLE (Tinder-like interaction)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS swipes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  location_id UUID NOT NULL REFERENCES locations(id) ON DELETE CASCADE,
+  action TEXT NOT NULL CHECK (action IN ('like', 'dislike', 'superlike')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, location_id)
+);
+
+-- Enable Row Level Security
+ALTER TABLE swipes ENABLE ROW LEVEL SECURITY;
+
+-- Users can read their own swipes
+CREATE POLICY "Users can read own swipes"
+  ON swipes FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Users can create their own swipes
+CREATE POLICY "Users can create own swipes"
+  ON swipes FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Create indexes
+CREATE INDEX IF NOT EXISTS idx_swipes_user ON swipes(user_id);
+CREATE INDEX IF NOT EXISTS idx_swipes_location ON swipes(location_id);
+

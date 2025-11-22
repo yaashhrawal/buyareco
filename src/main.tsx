@@ -18,6 +18,7 @@ import FeedPage from './pages/FeedPage';
 import MessagesPage from './pages/MessagesPage';
 import ProfilePage from './pages/ProfilePage';
 import TestPage from './pages/TestPage';
+import SwipePage from './pages/SwipePage';
 
 // Create React Query client
 const queryClient = new QueryClient({
@@ -38,6 +39,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<HomePage />} />
           <Route path="/test" element={<TestPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/swipe" element={<SwipePage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/instagram/callback" element={<InstagramCallbackPage />} />
